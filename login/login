@@ -5,14 +5,13 @@ import readline
 
 COMMANDS = []
 RE_SPACE = re.compile('.*\s+$', re.M)
-LOGIN_DIR = "/Users/lichuang/.login"
+LOGIN_DIR = os.environ['HOME'] + "/.login"
 
 def init_commands():
   for lists in os.listdir(LOGIN_DIR): 
         COMMANDS.append(lists)
   
 def do_login(line):
-  #os.system("/usr/local/bin/recorver_dev")
   path = os.path.join(LOGIN_DIR, line)
   os.system(open(path).readline())
 

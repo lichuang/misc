@@ -1,0 +1,54 @@
+#!/usr/bin/python
+import os
+import re
+import readline
+
+COMMANDS = []
+RE_SPACE = re.compile('.*\s+$', re.M)
+LOGIN_DIR = "/Users/lichuang/.login"
+
+def init_commands():
+  for lists in os.listdir(LOGIN_DIR): 
+        COMMANDS.append(lists)
+  
+def do_login(line):
+  #os.system("/usr/local/bin/recorver_dev")
+  path = os.path.join(LOGIN_DIR, line)
+  os.system(open(path).readline())
+
+class Completer(object):
+    def complete(self, text, state):
+        "Generic readline completion entry point."
+        buffer = readline.get_line_buffer()
+        line = readline.get_line_buffer().split()
+        # show all commands
+        if not line:
+            return [c + ' ' for c in COMMANDS][state]
+        # account for last argument ending in a space
+        if RE_SPACE.match(buffer):
+            line.append('')
+        # resolve command to the implementation function
+        cmd = line[0].strip()
+        if cmd in COMMANDS:
+            impl = getattr(self, 'complete_%s' % cmd)
+            args = line[1:]
+            if args:
+                return (impl(args) + [None])[state]
+            return [cmd + ' '][state]
+        #results = [c + ' ' for c in COMMANDS if c.startswith(cmd)] + [None]
+        results = [c + ' ' for c in COMMANDS if c.find(cmd) != -1] + [None]
+        return results[state]
+
+init_commands()
+comp = Completer()
+# we want to treat '/' as part of a word, so override the delimiters
+readline.set_completer_delims(' \t\n;')
+if 'libedit' in readline.__doc__:
+    readline.parse_and_bind("bind ^I rl_complete")
+else:
+    readline.parse_and_bind("tab: complete")
+readline.set_completer(comp.complete)
+print COMMANDS
+line = raw_input('Enter session name: ')
+
+do_login(line.strip())
